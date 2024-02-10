@@ -1,0 +1,38 @@
+name: Compile Resume
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+  push:
+    branches: [master]
+    paths:
+      - "resume.typ"
+      - "resume.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive" # Fetches the content of the submodules recursively
+
+      - name: List files in the repository
+        run: ls -laR
+
+      - name: Set up Typst
+        run: |
+          wget https://github.com/typst/typst/releases/download/v0.9.0/typst-x86_64-unknown-linux-musl.tar.xz
+          tar xvf typst-x86_64-unknown-linux-musl.tar.xz
+          sudo mv typst-x86_64-unknown-linux-musl/typst /usr/local/bin/
+
+      - name: Compile Resume
+        run: |
+          mkdir -p assets
+          typst compile resume.typ resume.pdf
+
+      - name: Upload Resume PDF as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: resume
+          path: Jason_Smith_CV.pdf
